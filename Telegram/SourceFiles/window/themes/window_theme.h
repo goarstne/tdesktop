@@ -247,6 +247,7 @@ private:
 	void checkUploadWallPaper();
 	[[nodiscard]] QImage postprocessBackgroundImage(QImage image);
 	void refreshThemeWatcher();
+	void watchOmarchyTheme();
 
 	friend bool IsNightMode();
 	friend void SetNightModeValue(bool nightMode);
@@ -284,6 +285,7 @@ private:
 	bool _themeTile = false;
 	std::optional<Data::CloudTheme> _editingTheme;
 	std::unique_ptr<QFileSystemWatcher> _themeWatcher;
+	std::unique_ptr<QFileSystemWatcher> _omarchyWatcher;
 
 	Data::WallPaper _paperForRevert
 		= Data::details::UninitializedWallPaper();

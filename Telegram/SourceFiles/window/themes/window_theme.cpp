@@ -601,6 +601,36 @@ void ChatBackground::start() {
 		ApplyDefaultWithPath(path);
 		KeepApplied();
 	}, _lifetime);
+
+	watchOmarchyTheme();
+}
+
+void ChatBackground::watchOmarchyTheme() {
+	const auto dir = QDir::homePath() + u"/.local/state/omarchy/current"_q;
+	if (!QFileInfo(dir).isDir()) {
+		return;
+	}
+	auto check = [=, last = QByteArray()]() mutable {
+		auto file = QFile(dir + u"/theme/telegram.tdesktop-theme"_q);
+		if (editingTheme() || !file.open(QIODevice::ReadOnly)) {
+			return;
+		}
+		auto content = file.readAll();
+		if (content == last || !Apply(file.fileName())) {
+			return;
+		}
+		last = std::move(content);
+		KeepApplied();
+	};
+	check();
+
+	// WHY: `omarchy theme set` swaps the whole theme directory, and a
+	// watch on the file itself is lost when that happens.
+	_omarchyWatcher = std::make_unique<QFileSystemWatcher>(QStringList(dir));
+	QObject::connect(
+		_omarchyWatcher.get(),
+		&QFileSystemWatcher::directoryChanged,
+		std::move(check));
 }
 
 void ChatBackground::refreshThemeWatcher() {
